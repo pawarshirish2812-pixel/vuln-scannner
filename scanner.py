@@ -1,3 +1,4 @@
+import time
 import argparse
 import socket
 from concurrent.futures import ThreadPoolExecutor
@@ -40,39 +41,51 @@ def parse_ports(port_str):
 
 
 def scan_port(target_ip, port, timeout=1):
-    """Ek port check karta hai. Open ho to dict wapas deta hai, warna None."""
+    """Sirf check karta hai ki port open hai ya nahi."""
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(timeout)
-        if s.connect_ex((target_ip, port)) != 0:
-            s.close()
-            return None
-
-        # Port open hai, ab banner grab karne ki koshish
-        banner = ""
-        try:
-            if port in (80, 8080):
-                s.send(b"HEAD / HTTP/1.0\r\n\r\n")
-            s.settimeout(2)
-            banner = s.recv(1024).decode(errors="ignore").strip()
-        except Exception:
-            pass
+        is_open = s.connect_ex((target_ip, port)) == 0
         s.close()
-
+        if not is_open:
+            return None
         return {
             "port": port,
             "service": COMMON_SERVICES.get(port, "unknown"),
-            "banner": banner.split("\n")[0][:100],  # pehli line, max 100 chars
+            "banner": "",
         }
     except Exception:
         return None
 
 
+def grab_banner(target_ip, port):
+    """Banner nikalta hai. Fail ho to 2 sec ruk ke 5 baar tak retry karta hai."""
+    for attempt in range(5):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(5)
+            s.connect((target_ip, port))
+            if port in (80, 8080):
+                s.send(b"HEAD / HTTP/1.0\r\n\r\n")
+            banner = s.recv(1024).decode(errors="ignore").strip()
+            s.close()
+            if banner:
+                return banner.split("\n")[0][:100]
+        except Exception:
+            pass
+        time.sleep(2)  # server ko saans lene do, phir dobara try
+    return ""
+
+
 def scan_ports(target_ip, ports):
-    """Saare ports ko 100 threads se ek saath scan karta hai."""
+    """Pehle 100 threads se open ports dhundhta hai, phir banners ek-ek karke."""
     with ThreadPoolExecutor(max_workers=100) as executor:
         results = executor.map(lambda p: scan_port(target_ip, p), ports)
-    return sorted([r for r in results if r], key=lambda r: r["port"])
+    open_ports = sorted([r for r in results if r], key=lambda r: r["port"])
+
+    for r in open_ports:
+        r["banner"] = grab_banner(target_ip, r["port"])
+    return open_ports
 
 
 import argparse

@@ -1,0 +1,6 @@
+﻿Target,Scan Time,Vulnerability Name,Severity,Port,Description,Recommended Mitigation
+scanme.nmap.org,2026-10-14 11:55:53,Outdated OpenSSH Version,Medium,22,Detected an old OpenSSH version (SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13) with publicly known vulnerabilities.,Upgrade OpenSSH to the latest stable version.
+scanme.nmap.org,2026-10-14 11:55:53,Missing Content-Security-Policy Header,Medium,80,"Without CSP, the browser has no rules limiting scripts, making Cross-Site Scripting (XSS) attacks easier.",Add a Content-Security-Policy header restricting trusted script and resource sources.
+scanme.nmap.org,2026-10-14 11:55:53,Missing X-Frame-Options Header,Medium,80,"The page can be embedded in an iframe on another site, enabling clickjacking attacks.",Add 'X-Frame-Options: DENY' or 'SAMEORIGIN'.
+scanme.nmap.org,2026-10-14 11:55:53,Missing X-Content-Type-Options Header,Low,80,Browsers may MIME-sniff responses and execute files as a different type than intended.,Add 'X-Content-Type-Options: nosniff'.
+scanme.nmap.org,2026-10-14 11:55:53,Server Version Disclosure,Low,80,The Server header reveals software details: 'Apache/2.4.7 (Ubuntu)'. Attackers can use this to find matching exploits.,Hide or genericize the Server header in the web server config.

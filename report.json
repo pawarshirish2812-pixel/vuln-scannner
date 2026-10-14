@@ -1,0 +1,55 @@
+{
+    "target": "scanme.nmap.org",
+    "target_ip": "45.33.32.156",
+    "scan_time": "2026-10-14 11:55:27",
+    "open_ports": [
+        {
+            "port": 22,
+            "service": "SSH",
+            "banner": "SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13"
+        },
+        {
+            "port": 80,
+            "service": "HTTP",
+            "banner": "HTTP/1.1 200 OK\r"
+        }
+    ],
+    "total_findings": 5,
+    "findings": [
+        {
+            "name": "Outdated OpenSSH Version",
+            "severity": "Medium",
+            "port": 22,
+            "description": "Detected an old OpenSSH version (SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13) with publicly known vulnerabilities.",
+            "mitigation": "Upgrade OpenSSH to the latest stable version."
+        },
+        {
+            "name": "Missing Content-Security-Policy Header",
+            "severity": "Medium",
+            "port": 80,
+            "description": "Without CSP, the browser has no rules limiting scripts, making Cross-Site Scripting (XSS) attacks easier.",
+            "mitigation": "Add a Content-Security-Policy header restricting trusted script and resource sources."
+        },
+        {
+            "name": "Missing X-Frame-Options Header",
+            "severity": "Medium",
+            "port": 80,
+            "description": "The page can be embedded in an iframe on another site, enabling clickjacking attacks.",
+            "mitigation": "Add 'X-Frame-Options: DENY' or 'SAMEORIGIN'."
+        },
+        {
+            "name": "Missing X-Content-Type-Options Header",
+            "severity": "Low",
+            "port": 80,
+            "description": "Browsers may MIME-sniff responses and execute files as a different type than intended.",
+            "mitigation": "Add 'X-Content-Type-Options: nosniff'."
+        },
+        {
+            "name": "Server Version Disclosure",
+            "severity": "Low",
+            "port": 80,
+            "description": "The Server header reveals software details: 'Apache/2.4.7 (Ubuntu)'. Attackers can use this to find matching exploits.",
+            "mitigation": "Hide or genericize the Server header in the web server config."
+        }
+    ]
+}
